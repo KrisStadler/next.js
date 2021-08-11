@@ -743,6 +743,7 @@ export default async function build(
             distDir,
             isLikeServerless,
             runtimeEnvConfig,
+            config.httpAgentOptions,
             config.i18n?.locales,
             config.i18n?.defaultLocale
           )
@@ -812,6 +813,7 @@ export default async function build(
                     distDir,
                     isLikeServerless,
                     runtimeEnvConfig,
+                    config.httpAgentOptions,
                     config.i18n?.locales,
                     config.i18n?.defaultLocale,
                     isPageStaticSpan.id
@@ -927,6 +929,22 @@ export default async function build(
       staticCheckWorkers.end()
       return returnValue
     })
+
+    if (isNextImageImported) {
+      try {
+        if (process.env.NEXT_SHARP_PATH) {
+          require(process.env.NEXT_SHARP_PATH)
+        } else {
+          require.resolve('sharp', {
+            paths: [path.join(dir, 'node_modules')],
+          })
+        }
+      } catch (e) {
+        Log.warn(
+          'Detected `next/image` usage without `sharp`. https://nextjs.org/docs/messages/sharp-missing-in-production'
+        )
+      }
+    }
 
     if (customAppGetInitialProps) {
       console.warn(
